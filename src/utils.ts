@@ -97,7 +97,19 @@ export function reRang(array: IGridViewArray, direction: string) {
   });
 }
 
-console.log(reRang([[1, 2, 3], [4, 5, 6], [7, 8, 9]], 'up'));
-console.log(reRang([[1, 2, 3], [4, 5, 6], [7, 8, 9]], 'right'));
-console.log(reRang([[1, 2, 3], [4, 5, 6], [7, 8, 9]], 'bottom'));
-console.log(reRang([[1, 2, 3], [4, 5, 6], [7, 8, 9]], 'left'));
+export function reRangArray(array: number[]) {
+  const length = array.length;
+  let arrTemp = [];
+  for (let i = 0; i < length; i++) {
+    if (array[i] === array[i + 1]) {
+      arrTemp.push(array[i] + array[i + 1]);
+      i += 1;
+    } else {
+      arrTemp.push(array[i])
+    }
+  }
+  for (let i = arrTemp.length; i < length; i++) {
+    arrTemp.push(0)
+  }
+  return arrTemp;
+}
