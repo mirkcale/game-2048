@@ -10,7 +10,7 @@ type IGridViewArray = number[][];
 
 enum IAngle {
   UP = 90,
-  right = 180,
+  RIGHT = 180,
   LEFT = 0,
   DOWN = 270
 }

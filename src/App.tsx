@@ -6,7 +6,7 @@ import GridView from './GridView';
 class App extends React.Component {
   public render() {
     return (
-      <GridView winGoal={2048} width={6} height={6}/>
+      <GridView winGoal={2048} width={4} height={4}/>
     );
   }
 }

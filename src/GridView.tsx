@@ -2,7 +2,15 @@ import * as React from "react";
 import './gridview.less';
 
 import {Modal} from 'antd';
-import {createMatrix, getAvailableLocation, getRandomNum, reRangArray, rotateArray} from './utils';
+import {
+  createMatrix,
+  getAvailableLocation,
+  getNumberBackgroundColor,
+  getNumberColor,
+  getRandomNum,
+  reRangArray,
+  rotateArray
+} from './utils';
 
 interface IGridViewProps {
   width: number
@@ -22,12 +30,16 @@ type IGridViewArray = number[][];
 interface IGridViewState {
   layout: IGridViewArray
   modalVisible: boolean
+  score: number
+  highScore: number
 }
 
 class GridView extends React.Component<IGridViewProps, IGridViewState> {
   public state: IGridViewState = {
+    highScore: localStorage.getItem('highScore') ? ~~(localStorage.getItem('highScore') as string) : 0,
     layout: createMatrix(this.props),
-    modalVisible: false
+    modalVisible: false,
+    score: 0
   };
 
   constructor(props: IGridViewProps) {
@@ -66,12 +78,21 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
 
   public render() {
     // tslint:disable-next-line
+    console.log(this.canReRang());
     return (
       <div>
         <div className="grid-container">
           {this.state.layout.map(items => {
             return items.map((item, index) => {
-              return <div className="number-box" key={index}>{item}</div>
+              return (
+                <div
+                  className="number-box"
+                  key={index}
+                  style={{backgroundColor: getNumberBackgroundColor(item), color: getNumberColor(item)}}
+                >
+                  {item}
+                </div>
+              )
             })
           })}
         </div>
@@ -89,6 +110,47 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
 
     );
   }
+
+  private canReRang = (): boolean => {
+    let canMove = false;
+    const layout = this.state.layout;
+    for (let i = 0, length = layout.length; i < length; i++) {
+      for (let j = 0; j < layout[i][j]; j++) {
+        // const innerLength = layout[i].length;
+        if (
+          layout[i][j] !== 0
+          && (layout[i][j] === layout[i][j + 1]
+            || (layout[i][j] === layout[i][j - 1])
+            || (i < length-1) && layout[i][j] === layout[i + 1][j]
+            || ((i > 1) && layout[i][j] === layout[i - 1][j])
+            )
+          || layout[i][j] === 0
+        ) {
+          canMove = true;
+          break
+        }
+        /*if (
+          layout[i][j] !== 0
+          && (i - 1 >= 0)
+          && (i + 1 < length)
+          && (j - 1 >= 0)
+          && (j + 1 > innerLength)
+          && (layout[i][j] === layout[i][j + 1]
+            || layout[i][j] === layout[i][j - 1]
+            || layout[i][j] === layout[i + 1][j]
+            || layout[i][j] === layout[i - 1][j]
+          ) || layout[i][j] === 0
+        ) {
+          canMove = true;
+          break
+        }*/
+      }
+      if (canMove) {
+        break
+      }
+    }
+    return canMove
+  };
 
   private handleKeyDown = (e: KeyboardEvent) => {
     // <- 37  ^| 38 -> 39 v| 40    w87 a65 s83 d68 
@@ -111,31 +173,39 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
           layout = this.reRang('DOWN')
         }
         const location = getAvailableLocation(layout);
-        if (!location) {
+        if (!location && !this.canReRang()) {
           this.setState({
             modalVisible: true
           });
           return
         }
-        const [x, y] = location;
-        layout[x][y] = getRandomNum();
-        this.setState({
-          layout
-        })
+        if (location) {
+          const [x, y] = location;
+          layout[x][y] = getRandomNum();
+          this.setState({
+            layout
+          })
+        }
       }
     })
   };
 
   private handleOk = () => {
-    this.setState({
-      modalVisible: false,
-    });
+    this.resetGame();
   };
 
   private handleCancel = () => {
     this.setState({
       modalVisible: false,
     });
+  };
+
+  private resetGame = () => {
+    this.setState({
+      layout: createMatrix(this.props),
+      modalVisible: false,
+      score: 0
+    })
   }
 }
 
