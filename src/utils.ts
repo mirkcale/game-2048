@@ -8,21 +8,28 @@ export function addNumberItem() {
 
 type IGridViewArray = number[][];
 
-interface IBoundary {
-  width: number
-  height: number
+enum IAngle {
+  UP = 90,
+  right = 180,
+  LEFT = 0,
+  DOWN = 270
 }
 
 /**
  * 返回随机数出现的坐标
- * @param boundary
  * @param array
  */
-export function getAvailableLocation(boundary: IBoundary, array: IGridViewArray): [number, number] {
-  // tslint:disable:no-bitwise
-  const x: number = ~~(Math.random() * boundary.width);
-  const y: number = ~~(Math.random() * boundary.height);
-  return array[x][y] === 0 ? [x, y] : getAvailableLocation(boundary, array)
+export function getAvailableLocation(array: IGridViewArray) {
+  const arr: Array<[number, number]> = [];
+  array.map((items, indexI) => {
+    items.map((item, indexJ) => {
+      if (item === 0) {
+        arr.push([indexI, indexJ])
+      }
+    })
+  });
+  const length = arr.length;
+  return length ? arr[Math.floor(Math.random() * length)] : null
 }
 
 /**
@@ -70,46 +77,72 @@ export function getNumberColor(num: number): string {
 }
 
 /**
+ * 旋转数组
  * 返回重新排列后的数组
- * @param direction
+ * @param angle
  * @param array
  */
-export function reRang(array: IGridViewArray, direction: string) {
-  // tslint:disable
+export function rotateArray(array: IGridViewArray, angle: IAngle): IGridViewArray {
   return array.map((itemI, indexI) => {
-    let outLength = array.length;
+    const outLength = array.length;
     return itemI.map((itemJ, indexJ) => {
-      let innerLength = itemI.length;
-      // console.log('横 %d,纵 %d', indexI, indexJ);
-      switch (direction) {
-        case 'up':
+      const innerLength = itemI.length;
+      switch (angle) {
+        case 0:
+          return array[indexI][indexJ]; // 保持不变
+        case 90:
           return array[indexJ][outLength - 1 - indexI];
-        case 'right':
+        case 180:
+          return array[innerLength - 1 - indexI][outLength - 1 - indexJ];
+        case 270:
           return array[innerLength - 1 - indexJ][indexI];
-        case 'bottom':
-          return array[innerLength - 1 - indexJ][outLength - 1 - indexI];
-        case 'left':
-          return array[indexJ][indexI];
         default:
-          return array[indexJ][indexI];
+          return array[indexI][indexJ]; // 保持不变
       }
     })
   });
 }
 
+/**
+ * 向左压缩数组
+ * @param array
+ */
 export function reRangArray(array: number[]) {
   const length = array.length;
-  let arrTemp = [];
+  const arrTemp = [];
   for (let i = 0; i < length; i++) {
-    if (array[i] === array[i + 1]) {
+    if (array[i] !== 0 && array[i] === array[i + 1]) {
       arrTemp.push(array[i] + array[i + 1]);
       i += 1;
     } else {
-      arrTemp.push(array[i])
+      if (array[i]) {
+        arrTemp.push(array[i])
+      }
     }
   }
   for (let i = arrTemp.length; i < length; i++) {
     arrTemp.push(0)
   }
   return arrTemp;
+}
+
+interface IGridViewProps {
+  width: number
+  height: number
+}
+
+// 生成 n*m 的二维数组
+export function createMatrix(boundary: IGridViewProps): IGridViewArray {
+  const arr: IGridViewArray = [];
+  for (let i = 0; i < boundary.width; i++) {
+    arr.push([]);
+    for (let j = 0; j < boundary.height; j++) {
+      arr[i].push(0)
+    }
+  }
+  return arr
+}
+
+export function getRandomNum(): number {
+  return Math.random() * 100 > 89 ? 4 : 2
 }
