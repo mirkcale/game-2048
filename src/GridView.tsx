@@ -79,6 +79,8 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
   public render() {
     return (
       <div>
+        <div>历史最高分：{this.state.highScore}</div>
+        <div>当前分数：{this.state.score}</div>
         <div className="grid-container">
           {this.state.layout.map(items => {
             return items.map((item, index) => {
@@ -108,6 +110,16 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
 
     );
   }
+
+  private getHighScore = (layout: IGridViewArray): number => {
+    let score: number = 0;
+    layout.map((arr) => {
+      arr.map(value => {
+        score = score < value ? value : score
+      })
+    });
+    return score
+  };
 
   private canReRang = (): boolean => {
     let canMove = false;
@@ -153,6 +165,10 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
         if (!location && !this.canReRang()) {
           this.setState({
             modalVisible: true
+          }, () => {
+            this.setState({
+              score: this.getHighScore(this.state.layout)
+            })
           });
           return
         }
@@ -161,6 +177,10 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
           layout[x][y] = getRandomNum();
           this.setState({
             layout
+          }, () => {
+            this.setState({
+              score: this.getHighScore(this.state.layout)
+            })
           })
         }
       }
@@ -169,12 +189,20 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
 
   private handleOk = () => {
     this.resetGame();
+    this.setState({
+      highScore: Math.max(this.state.score, this.state.highScore)
+    });
+    localStorage.setItem('highScore', Math.max(this.state.score, this.state.highScore) + '')
   };
 
   private handleCancel = () => {
     this.setState({
       modalVisible: false,
     });
+    this.setState({
+      highScore: Math.max(this.state.score, this.state.highScore)
+    });
+    localStorage.setItem('highScore', Math.max(this.state.score, this.state.highScore) + '')
   };
 
   private resetGame = () => {
