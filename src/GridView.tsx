@@ -77,8 +77,6 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
   }
 
   public render() {
-    // tslint:disable-next-line
-    console.log(this.canReRang());
     return (
       <div>
         <div className="grid-container">
@@ -115,35 +113,15 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
     let canMove = false;
     const layout = this.state.layout;
     for (let i = 0, length = layout.length; i < length; i++) {
-      for (let j = 0; j < layout[i][j]; j++) {
-        // const innerLength = layout[i].length;
-        if (
-          layout[i][j] !== 0
-          && (layout[i][j] === layout[i][j + 1]
-            || (layout[i][j] === layout[i][j - 1])
-            || (i < length-1) && layout[i][j] === layout[i + 1][j]
-            || ((i > 1) && layout[i][j] === layout[i - 1][j])
-            )
-          || layout[i][j] === 0
-        ) {
+      for (let j = 0; j < layout[i].length; j++) {
+        if (layout[i][j] === layout[i][j + 1]) {
           canMove = true;
           break
         }
-        /*if (
-          layout[i][j] !== 0
-          && (i - 1 >= 0)
-          && (i + 1 < length)
-          && (j - 1 >= 0)
-          && (j + 1 > innerLength)
-          && (layout[i][j] === layout[i][j + 1]
-            || layout[i][j] === layout[i][j - 1]
-            || layout[i][j] === layout[i + 1][j]
-            || layout[i][j] === layout[i - 1][j]
-          ) || layout[i][j] === 0
-        ) {
+        if (i !== length - 1 && layout[i][j] === layout[i + 1][j]) {
           canMove = true;
-          break
-        }*/
+          break;
+        }
       }
       if (canMove) {
         break
@@ -158,7 +136,6 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
     const keyCode: number = e.keyCode;
     directionKeys.map((code) => {
       if (keyCode === code) {
-        // tslint:disable-next-line
         let layout: IGridViewArray = [];
         if (code === 37 || code === 65) {
           layout = this.reRang('LEFT')

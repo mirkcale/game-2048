@@ -61,7 +61,7 @@ export function getNumberBackgroundColor(num: number): string {
     case 2048:
       return "#09c";
     case 4096:
-      return "#a6bc";
+      return "#aca6bc";
     case 8192:
       return "#93c";
   }
