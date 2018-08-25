@@ -3,18 +3,11 @@ import './gridview.less';
 
 import {Modal} from 'antd';
 import {connect} from 'react-redux';
-import {bindActionCreators} from 'redux';
-import {
-  createMatrix,
-  getAvailableLocation,
-  getNumberBackgroundColor,
-  getNumberColor,
-  getRandomNum,
-  reRangArray,
-  rotateArray
-} from './utils';
+import {bindActionCreators, Dispatch} from 'redux';
 
-interface IGridViewProps {
+import utils from './utils';
+
+type IGridViewProps = IConnectGridView & IConnectDispatch & {
   width: number
   height: number
   winGoal: number
@@ -22,7 +15,7 @@ interface IGridViewProps {
 
 export type IGridViewArray = number[][];
 
-export interface IGridViewState extends IConnectGridview {
+export interface IGridViewState {
   layout: IGridViewArray
   modalVisible: boolean
   score: number
@@ -34,7 +27,7 @@ import {doMove} from './store/actions';
 class GridView extends React.Component<IGridViewProps, IGridViewState> {
   public state: IGridViewState = {
     highScore: localStorage.getItem('highScore') ? ~~(localStorage.getItem('highScore') as string) : 0,
-    layout: createMatrix(this.props),
+    layout: utils.createMatrix(this.props),
     modalVisible: false,
     score: 0
   };
@@ -53,15 +46,15 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
     const array = this.state.layout;
     switch (direction) {
       case 'LEFT':
-        return rotateArray(array, 0).map(reRangArray);
+        return utils.rotateArray(array, 0).map(utils.reRangArray);
       case 'UP':
-        return rotateArray(rotateArray(array, 90).map(reRangArray), 270);
+        return utils.rotateArray(utils.rotateArray(array, 90).map(utils.reRangArray), 270);
       case 'RIGHT':
-        return rotateArray(rotateArray(array, 180).map(reRangArray), 180);
+        return utils.rotateArray(utils.rotateArray(array, 180).map(utils.reRangArray), 180);
       case 'DOWN':
-        return rotateArray(rotateArray(array, 270).map(reRangArray), 90);
+        return utils.rotateArray(utils.rotateArray(array, 270).map(utils.reRangArray), 90);
       default:
-        return rotateArray(array, 0).map(reRangArray)
+        return utils.rotateArray(array, 0).map(utils.reRangArray)
     }
   };
 
@@ -85,7 +78,7 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
                 <div
                   className="number-box"
                   key={index}
-                  style={{backgroundColor: getNumberBackgroundColor(item), color: getNumberColor(item)}}
+                  style={{backgroundColor: utils.getNumberBackgroundColor(item), color: utils.getNumberColor(item)}}
                 >
                   {item}
                 </div>
@@ -94,7 +87,7 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
           })}
         </div>
         {/*tslint:disable-next-line*/}
-        {/*<button onClick={() => console.log(this.props.doMove, this.props.layout, this.props.score)}>改变数字</button>*/}
+        <button onClick={() => this.props.doMove('LEFT', this.state.layout)}>改变数字</button>
         <Modal
           title="Basic Modal"
           visible={this.state.modalVisible}
@@ -160,7 +153,7 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
         if (code === 40 || code === 83) {
           layout = this.reRang('DOWN')
         }
-        const location = getAvailableLocation(layout);
+        const location = utils.getAvailableLocation(layout);
         if (!location && !this.canReRang()) {
           this.setState({
             modalVisible: true
@@ -173,7 +166,7 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
         }
         if (location) {
           const [x, y] = location;
-          layout[x][y] = getRandomNum();
+          layout[x][y] = utils.getRandomNum();
           this.setState({
             layout
           }, () => {
@@ -206,18 +199,23 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
 
   private resetGame = () => {
     this.setState({
-      layout: createMatrix(this.props),
+      layout: utils.createMatrix(this.props),
       modalVisible: false,
       score: 0
     })
   }
 }
 
-interface IConnectGridview {
-  
+interface IConnectDispatch {
+  doMove: typeof doMove
 }
 
-const mapDispatchToProps = (dispatch: any) => {
+interface IConnectGridView {
+  layout: IGridViewArray
+  score: number
+}
+
+const mapDispatchToProps = (dispatch: Dispatch) => {
   return bindActionCreators({
     doMove
   }, dispatch)
@@ -230,5 +228,4 @@ const mapStateToProps = (state: any) => {
   }
 };
 
-// export default GridView;
-export default connect<any, any, IGridViewProps>(mapStateToProps, mapDispatchToProps)(GridView) as React.ComponentClass<IConnectGridview>;
+export default connect<IConnectGridView, IConnectDispatch>(mapStateToProps, mapDispatchToProps)(GridView);

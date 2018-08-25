@@ -2,6 +2,8 @@ import {createStore, StoreEnhancer} from 'redux'
 import {createMatrix} from "../utils";
 import reducer from './reducer'
 
+export type TInitialState = typeof initialState;
+
 const initialState = {
   layout: createMatrix({width: 4, height: 4}),
   score: 111

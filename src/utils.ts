@@ -138,3 +138,16 @@ export function createMatrix(boundary: IGridViewProps): IGridViewArray {
 export function getRandomNum(): number {
   return Math.random() * 100 > 89 ? 4 : 2
 }
+
+const utils = {
+  createMatrix,
+  getAvailableLocation,
+  getNumberBackgroundColor,
+  getNumberColor,
+  getRandomNum,
+  reRangArray,
+  rotateArray,
+};
+export default utils;
+
+export type utilsType = typeof utils; 
