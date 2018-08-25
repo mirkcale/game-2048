@@ -1,11 +1,3 @@
-/**
- * 随机生成 2或者 4
- */
-
-export function addNumberItem() {
-  return Math.random() * 100 > 88 ? 4 : 2;
-}
-
 type IGridViewArray = number[][];
 
 enum IAngle {

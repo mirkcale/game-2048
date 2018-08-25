@@ -2,6 +2,8 @@ import * as React from "react";
 import './gridview.less';
 
 import {Modal} from 'antd';
+import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
 import {
   createMatrix,
   getAvailableLocation,
@@ -18,21 +20,16 @@ interface IGridViewProps {
   winGoal: number
 }
 
-type IGridViewArray = number[][];
+export type IGridViewArray = number[][];
 
-/*enum IDirections {
-  left = 'LEFT',
-  right = 'RIGHT',
-  up = 'UP',
-  down = 'DOWN',
-}*/
-
-interface IGridViewState {
+export interface IGridViewState extends IConnectGridview {
   layout: IGridViewArray
   modalVisible: boolean
   score: number
   highScore: number
 }
+
+import {doMove} from './store/actions';
 
 class GridView extends React.Component<IGridViewProps, IGridViewState> {
   public state: IGridViewState = {
@@ -96,6 +93,8 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
             })
           })}
         </div>
+        {/*tslint:disable-next-line*/}
+        {/*<button onClick={() => console.log(this.props.doMove, this.props.layout, this.props.score)}>改变数字</button>*/}
         <Modal
           title="Basic Modal"
           visible={this.state.modalVisible}
@@ -214,4 +213,22 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
   }
 }
 
-export default GridView;
+interface IConnectGridview {
+  
+}
+
+const mapDispatchToProps = (dispatch: any) => {
+  return bindActionCreators({
+    doMove
+  }, dispatch)
+};
+
+const mapStateToProps = (state: any) => {
+  return {
+    layout: state.layout,
+    score: state.state
+  }
+};
+
+// export default GridView;
+export default connect<any, any, IGridViewProps>(mapStateToProps, mapDispatchToProps)(GridView) as React.ComponentClass<IConnectGridview>;
