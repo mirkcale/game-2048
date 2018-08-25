@@ -5,7 +5,7 @@ import * as actionTypes from "./actionTypes";
 import {IGridViewArray} from '../GridView';
 import {createMatrix, reRangArray, rotateArray} from "../utils";
 
-function doMoveReducer(state: IGridViewArray, action: IAction) {
+function doMoveReducer(state: IGridViewArray = createMatrix({width: 4, height: 4}), action: IAction) {
   if (action.type === actionTypes.MOVE) {
     const direction = action.payload.direction;
     switch (direction) {
@@ -21,12 +21,12 @@ function doMoveReducer(state: IGridViewArray, action: IAction) {
         return rotateArray(action.payload.layout, 0).map(reRangArray)
     }
   }
-  
+
   if (action.type === actionTypes.RESET) {
     return createMatrix({width: 4, height: 4})
   }
-  
-  return {...state}
+
+  return state
 }
 
 function setScore(state: number, action: IAction) {
