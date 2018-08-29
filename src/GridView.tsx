@@ -4,6 +4,7 @@ import './gridview.less';
 import {Modal} from 'antd';
 import {connect} from 'react-redux';
 import {bindActionCreators, Dispatch} from 'redux';
+import {directions} from './store/actions';
 
 import utils from './utils';
 
@@ -21,8 +22,10 @@ export interface IGridViewState {
   score: number
   highScore: number
 }
+import {StateWithHistory} from "redux-undo";
 
-import {doMove} from './store/actions';
+import {doMove, resetLayout} from './store/actions';
+import UndoRedo from "./UndoRedo";
 
 class GridView extends React.Component<IGridViewProps, IGridViewState> {
   public state: IGridViewState = {
@@ -72,7 +75,7 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
         <div>历史最高分：{this.state.highScore}</div>
         <div>当前分数：{this.state.score}</div>
         <div className="grid-container">
-          {this.state.layout.map(items => {
+          {this.props.layout.present.map(items => {
             return items.map((item, index) => {
               return (
                 <div
@@ -86,8 +89,7 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
             })
           })}
         </div>
-        {/*tslint:disable-next-line*/}
-        <button onClick={() => this.props.doMove('LEFT', this.state.layout)}>改变数字</button>
+        <UndoRedo/>
         <Modal
           title="Basic Modal"
           visible={this.state.modalVisible}
@@ -103,6 +105,18 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
     );
   }
 
+  public componentWillReceiveProps(nextProps: IGridViewProps) {
+    const location = utils.getAvailableLocation(nextProps.layout.present);
+    this.setState({
+      score: this.getHighScore(nextProps.layout.present)
+    });
+    if (!location && !this.canReRang(nextProps.layout.present)) {
+      this.setState({
+        modalVisible: true
+      })
+    }
+  }
+
   private getHighScore = (layout: IGridViewArray): number => {
     let score: number = 0;
     layout.map((arr) => {
@@ -113,9 +127,8 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
     return score
   };
 
-  private canReRang = (): boolean => {
+  private canReRang = (layout: IGridViewArray): boolean => {
     let canMove = false;
-    const layout = this.state.layout;
     for (let i = 0, length = layout.length; i < length; i++) {
       for (let j = 0; j < layout[i].length; j++) {
         if (layout[i][j] === layout[i][j + 1]) {
@@ -140,49 +153,27 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
     const keyCode: number = e.keyCode;
     directionKeys.map((code) => {
       if (keyCode === code) {
-        let layout: IGridViewArray = [];
         if (code === 37 || code === 65) {
-          layout = this.reRang('LEFT')
+          this.props.doMove(directions.L, this.props.layout.present);
         }
         if (code === 38 || code === 87) {
-          layout = this.reRang('UP')
+          this.props.doMove(directions.U, this.props.layout.present);
         }
         if (code === 39 || code === 68) {
-          layout = this.reRang('RIGHT')
+          this.props.doMove(directions.R, this.props.layout.present);
         }
         if (code === 40 || code === 83) {
-          layout = this.reRang('DOWN')
-        }
-        const location = utils.getAvailableLocation(layout);
-        if (!location && !this.canReRang()) {
-          this.setState({
-            modalVisible: true
-          }, () => {
-            this.setState({
-              score: this.getHighScore(this.state.layout)
-            })
-          });
-          return
-        }
-        if (location) {
-          const [x, y] = location;
-          layout[x][y] = utils.getRandomNum();
-          this.setState({
-            layout
-          }, () => {
-            this.setState({
-              score: this.getHighScore(this.state.layout)
-            })
-          })
+          this.props.doMove(directions.D, this.props.layout.present);
         }
       }
     })
   };
 
   private handleOk = () => {
-    this.resetGame();
+    this.props.resetLayout();
     this.setState({
-      highScore: Math.max(this.state.score, this.state.highScore)
+      highScore: Math.max(this.state.score, this.state.highScore),
+      modalVisible: false
     });
     localStorage.setItem('highScore', Math.max(this.state.score, this.state.highScore) + '')
   };
@@ -197,27 +188,22 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
     localStorage.setItem('highScore', Math.max(this.state.score, this.state.highScore) + '')
   };
 
-  private resetGame = () => {
-    this.setState({
-      layout: utils.createMatrix(this.props),
-      modalVisible: false,
-      score: 0
-    })
-  }
 }
 
 interface IConnectDispatch {
   doMove: typeof doMove
+  resetLayout: typeof resetLayout
 }
 
 interface IConnectGridView {
-  layout: IGridViewArray
+  layout: StateWithHistory<IGridViewArray>
   score: number
 }
 
 const mapDispatchToProps = (dispatch: Dispatch) => {
   return bindActionCreators({
-    doMove
+    doMove,
+    resetLayout
   }, dispatch)
 };
 

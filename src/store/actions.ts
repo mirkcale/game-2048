@@ -7,14 +7,26 @@ export interface IAction {
   error?: boolean
   meta?: string
 }
+export enum directions {
+  L = 'left',
+  R = 'RIGHT',
+  U = 'UP',
+  D = 'DOWN',
+}
 
-export function doMove(direction: string, layout: IGridViewArray): IAction {
+export function doMove(direction: directions, layout: IGridViewArray): IAction {
   return {
     payload: {
       direction,
       layout
     },
     type: actionsTypes.MOVE
+  }
+}
+
+export function resetLayout() {
+  return {
+    type: actionsTypes.RESET
   }
 }
 

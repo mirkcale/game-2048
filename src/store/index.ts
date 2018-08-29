@@ -1,11 +1,24 @@
-import {createStore, StoreEnhancer} from 'redux'
+import {createStore, StoreEnhancer} from 'redux';
+import {StateWithHistory} from 'redux-undo';
 import {createMatrix} from "../utils";
-import reducer from './reducer'
+import reducer from './reducer';
+
+import {IGridViewArray} from "../GridView";
 
 export type TInitialState = typeof initialState;
 
+const layout: StateWithHistory<IGridViewArray> = {
+  _latestUnfiltered: createMatrix({width: 4, height: 4}),
+  future: [],
+  group: [],
+  index: 0,
+  limit: 9,
+  past: [],
+  present: createMatrix({width: 4, height: 4})
+};
+
 const initialState = {
-  layout: createMatrix({width: 4, height: 4}),
+  layout,
   score: 111
 };
 

@@ -1,6 +1,6 @@
 type IGridViewArray = number[][];
 
-enum IAngle {
+export enum IAngle {
   UP = 90,
   RIGHT = 180,
   LEFT = 0,
@@ -30,6 +30,8 @@ export function getAvailableLocation(array: IGridViewArray) {
  */
 export function getNumberBackgroundColor(num: number): string {
   switch (num) {
+    case 0:
+      return '#CDC1B4';
     case 2:
       return "#eee4da";
     case 4:
@@ -65,6 +67,9 @@ export function getNumberBackgroundColor(num: number): string {
  * @param num
  */
 export function getNumberColor(num: number): string {
+  if (num === 0) {
+    return 'transparent';
+  }
   return num <= 4 ? '#776e65' : '#fff';
 }
 
@@ -80,13 +85,13 @@ export function rotateArray(array: IGridViewArray, angle: IAngle): IGridViewArra
     return itemI.map((itemJ, indexJ) => {
       const innerLength = itemI.length;
       switch (angle) {
-        case 0:
+        case IAngle.LEFT:
           return array[indexI][indexJ]; // 保持不变
-        case 90:
+        case IAngle.UP:
           return array[indexJ][outLength - 1 - indexI];
-        case 180:
+        case IAngle.RIGHT:
           return array[innerLength - 1 - indexI][outLength - 1 - indexJ];
-        case 270:
+        case IAngle.DOWN:
           return array[innerLength - 1 - indexJ][indexI];
         default:
           return array[indexI][indexJ]; // 保持不变
@@ -139,7 +144,28 @@ export function getRandomNum(): number {
   return Math.random() * 100 > 89 ? 4 : 2
 }
 
+export function canReRang(layout: IGridViewArray) {
+  let canMove = false;
+  for (let i = 0, length = layout.length; i < length; i++) {
+    for (let j = 0; j < layout[i].length; j++) {
+      if (layout[i][j] === layout[i][j + 1]) {
+        canMove = true;
+        break
+      }
+      if (i !== length - 1 && layout[i][j] === layout[i + 1][j]) {
+        canMove = true;
+        break;
+      }
+    }
+    if (canMove) {
+      break
+    }
+  }
+  return canMove
+}
+
 const utils = {
+  canReRang,
   createMatrix,
   getAvailableLocation,
   getNumberBackgroundColor,
@@ -150,4 +176,4 @@ const utils = {
 };
 export default utils;
 
-export type utilsType = typeof utils; 
+export type utilsType = typeof utils;
