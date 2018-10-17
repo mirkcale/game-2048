@@ -72,8 +72,8 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
   }
   
   public swipe = (e: any) => {
-    const direction = e.direction;
-    this.reRang(direction);
+    const direction:directions = e.direction;
+    this.props.doMove(direction, this.props.layout.present);
   };
 
   public render() {

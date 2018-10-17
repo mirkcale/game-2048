@@ -4,7 +4,7 @@
   * Github: https://github.com/AlloyTeam/AlloyFinger
   */
 
-import * as _ from 'lodash';
+import _ from 'lodash';
 import React, {Component} from 'react';
 import {directions} from './store/actions';
 interface IPosition {
@@ -120,7 +120,7 @@ export default class AlloyFinger extends Component<IAlloyFingerProps> {
 
   private _emitEvent(name: string, ...arg: any[]) {
     // tslint:disable:no-console
-    console.log(name, this.props[name]);
+    console.log(name);
     if (this.props[name]) {
       this.props[name](...arg);
     }
