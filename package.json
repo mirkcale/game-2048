@@ -5,6 +5,7 @@
   "dependencies": {
     "@types/lodash": "^4.14.116",
     "@types/react-redux": "^6.0.6",
+    "alloyfinger": "^0.1.15",
     "antd": "^3.8.2",
     "immutable": "^3.8.2",
     "lodash": "^4.17.10",

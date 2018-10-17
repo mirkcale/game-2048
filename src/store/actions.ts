@@ -8,7 +8,7 @@ export interface IAction {
   meta?: string
 }
 export enum directions {
-  L = 'left',
+  L = 'LEFT',
   R = 'RIGHT',
   U = 'UP',
   D = 'DOWN',

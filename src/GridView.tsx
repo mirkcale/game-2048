@@ -6,6 +6,7 @@ import {connect} from 'react-redux';
 import {bindActionCreators, Dispatch} from 'redux';
 import {directions} from './store/actions';
 
+import AlloyFinger from './AlloyFinger';
 import utils from './utils';
 
 type IGridViewProps = IConnectGridView & IConnectDispatch & {
@@ -45,16 +46,17 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
    * rotateArray(rotateArray(array,180).map(reRangArray),180) right
    * rotateArray(rotateArray(array,270).map(reRangArray),90) down
    */
-  public reRang = (direction: string) => {
+  public reRang = (direction: directions) => {
     const array = this.state.layout;
+    alert(direction);
     switch (direction) {
-      case 'LEFT':
+      case directions.L:
         return utils.rotateArray(array, 0).map(utils.reRangArray);
-      case 'UP':
+      case directions.U:
         return utils.rotateArray(utils.rotateArray(array, 90).map(utils.reRangArray), 270);
-      case 'RIGHT':
+      case directions.R:
         return utils.rotateArray(utils.rotateArray(array, 180).map(utils.reRangArray), 180);
-      case 'DOWN':
+      case directions.D:
         return utils.rotateArray(utils.rotateArray(array, 270).map(utils.reRangArray), 90);
       default:
         return utils.rotateArray(array, 0).map(utils.reRangArray)
@@ -68,40 +70,48 @@ class GridView extends React.Component<IGridViewProps, IGridViewState> {
   public componentWillUnmount() {
     window.removeEventListener('keydown', this.handleKeyDown)
   }
+  
+  public swipe = (e: any) => {
+    const direction = e.direction;
+    this.reRang(direction);
+  };
 
   public render() {
     return (
-      <div>
-        <div>历史最高分：{this.state.highScore}</div>
-        <div>当前分数：{this.state.score}</div>
-        <div className="grid-container">
-          {this.props.layout.present.map(items => {
-            return items.map((item, index) => {
-              return (
-                <div
-                  className="number-box"
-                  key={index}
-                  style={{backgroundColor: utils.getNumberBackgroundColor(item), color: utils.getNumberColor(item)}}
-                >
-                  {item}
-                </div>
-              )
-            })
-          })}
+      <AlloyFinger
+        onSwipe={this.swipe}
+      >
+        <div>
+          <div>历史最高分：{this.state.highScore}</div>
+          <div>当前分数：{this.state.score}</div>
+          <div className="grid-container">
+            {this.props.layout.present.map(items => {
+              return items.map((item, index) => {
+                return (
+                  <div
+                    className="number-box"
+                    key={index}
+                    style={{backgroundColor: utils.getNumberBackgroundColor(item), color: utils.getNumberColor(item)}}
+                  >
+                    {item}
+                  </div>
+                )
+              })
+            })}
+          </div>
+          <UndoRedo/>
+          <Modal
+            title="Basic Modal"
+            visible={this.state.modalVisible}
+            cancelText="知道了"
+            okText="再来一局"
+            onCancel={this.handleCancel}
+            onOk={this.handleOk}
+          >
+            <p>你已经输了</p>
+          </Modal>
         </div>
-        <UndoRedo/>
-        <Modal
-          title="Basic Modal"
-          visible={this.state.modalVisible}
-          cancelText="知道了"
-          okText="再来一局"
-          onCancel={this.handleCancel}
-          onOk={this.handleOk}
-        >
-          <p>你已经输了</p>
-        </Modal>
-      </div>
-
+      </AlloyFinger>
     );
   }
 
