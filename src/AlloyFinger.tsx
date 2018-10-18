@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
 import {directions} from './store/actions';
+
 interface IPosition {
   x: number;
   y: number;
@@ -37,65 +38,63 @@ interface IAlloyFingerProps {
 type NumOrNull = null | number;
 
 export default class AlloyFinger extends Component<IAlloyFingerProps> {
-  public scale = 1;
-  public preV: IPositionInital = {x: null, y: null};
-  public pinchStartLen: NumOrNull = null;
-  public isSingleTap = false;
-  public isDoubleTap = false;
-  public delta: NumOrNull = null;
-  public last: NumOrNull = null;
-  public now: NumOrNull = null;
-  public end: NumOrNull = null;
-  public multiTouch = false;
-  public tapTimeout: number;
-  public longTapTimeout: number;
-  public singleTapTimeout: number;
-  public swipeTimeout: number;
-  public x1: NumOrNull = null;
-  public x2: NumOrNull = null;
-  public y1: NumOrNull = null;
-  public y2: NumOrNull = null;
-  public preTapPosition: IPositionInital = {x: null, y: null};
-
-  // Disable taps after longTap
-  public afterLongTap = false;
-  public afterLongTapTimeout: number;
-
-  constructor(props: any) {
-    super(props);
-  }
-
-  public getLen(v: IPosition) {
+  public static getLen(v: IPosition) {
     return Math.sqrt(v.x * v.x + v.y * v.y);
   }
 
-  public dot(v1: IPosition, v2: IPosition) {
+  public static dot(v1: IPosition, v2: IPosition) {
     return v1.x * v2.x + v1.y * v2.y;
   }
 
-  public getAngle(v1: IPosition, v2: IPosition) {
-    const mr = this.getLen(v1) * this.getLen(v2);
+  public static getAngle(v1: IPosition, v2: IPosition) {
+    const mr = AlloyFinger.getLen(v1) * AlloyFinger.getLen(v2);
     if (mr === 0) {
       return 0;
     }
-    let r = this.dot(v1, v2) / mr;
+    let r = AlloyFinger.dot(v1, v2) / mr;
     if (r > 1) {
       r = 1;
     }
     return Math.acos(r);
   }
 
-  public cross(v1: IPosition, v2: IPosition) {
+  public static cross(v1: IPosition, v2: IPosition) {
     return v1.x * v2.y - v2.x * v1.y;
   }
 
-  public getRotateAngle(v1: IPosition, v2: IPosition) {
-    let angle = this.getAngle(v1, v2);
-    if (this.cross(v1, v2) > 0) {
+  public static getRotateAngle(v1: IPosition, v2: IPosition) {
+    let angle = AlloyFinger.getAngle(v1, v2);
+    if (AlloyFinger.cross(v1, v2) > 0) {
       angle *= -1;
     }
 
     return angle * 180 / Math.PI;
+  }
+  
+  private pinchStartLen: NumOrNull = null;
+  private delta: NumOrNull = null;
+  private last: NumOrNull = null;
+  private now: NumOrNull = null;
+  private end: NumOrNull = null;
+  private multiTouch = false;
+  private tapTimeout: number;
+  private longTapTimeout: number;
+  private singleTapTimeout: number;
+  private swipeTimeout: number;
+  private x1: NumOrNull = null;
+  private x2: NumOrNull = null;
+  private y1: NumOrNull = null;
+  private y2: NumOrNull = null;
+  private preTapPosition: IPositionInital = {x: null, y: null};
+
+  // Disable taps after longTap
+  private afterLongTap = false;
+  private afterLongTapTimeout: number;
+  private preV: IPositionInital = {x: null, y: null};
+  private isSingleTap = false;
+  private isDoubleTap = false;
+  constructor(props: any) {
+    super(props);
   }
 
   public render() {
@@ -106,17 +105,6 @@ export default class AlloyFinger extends Component<IAlloyFingerProps> {
       onTouchStart: this._handleTouchStart.bind(this)
     });
   }
-
-
-  public _resetState() {
-    this.setState({
-      start: 0,
-      swiping: false,
-      x: null,
-      y: null
-    });
-  }
-
 
   private _emitEvent(name: string, ...arg: any[]) {
     // tslint:disable:no-console
@@ -151,7 +139,7 @@ export default class AlloyFinger extends Component<IAlloyFingerProps> {
       const v = {x: evt.touches[1].pageX - this.x1, y: evt.touches[1].pageY - this.y1};
       preV.x = v.x;
       preV.y = v.y;
-      this.pinchStartLen = this.getLen(preV);
+      this.pinchStartLen = AlloyFinger.getLen(preV);
       this._emitEvent('onMultipointStart', emitEvent);
     } else {
       this.isSingleTap = true;
@@ -177,15 +165,15 @@ export default class AlloyFinger extends Component<IAlloyFingerProps> {
     if (len > 1) {
       const v = {x: evt.touches[1].pageX - currentX, y: evt.touches[1].pageY - currentY};
       if (preV.x !== null) {
-        if (this.pinchStartLen as number > 0) {
+        if (this.pinchStartLen && this.pinchStartLen > 0) {
           emitEvent.center = {
             x: (evt.touches[1].pageX + currentX) / 2,
             y: (evt.touches[1].pageY + currentY) / 2
           };
-          emitEvent.scale = emitEvent.zoom = this.getLen(v) / (this.pinchStartLen as number);
+          emitEvent.scale = emitEvent.zoom = AlloyFinger.getLen(v) / this.pinchStartLen;
           this._emitEvent('onPinch', emitEvent);
         }
-        emitEvent.angle = this.getRotateAngle(v, preV);
+        emitEvent.angle = AlloyFinger.getRotateAngle(v, preV);
         this._emitEvent('onRotate', emitEvent);
       }
       preV.x = v.x;
@@ -262,7 +250,6 @@ export default class AlloyFinger extends Component<IAlloyFingerProps> {
 
     this.preV.x = 0;
     this.preV.y = 0;
-    this.scale = 1;
     this.pinchStartLen = null;
     this.x1 = this.x2 = this.y1 = this.y2 = null;
     this.multiTouch = false;
@@ -277,7 +264,7 @@ export default class AlloyFinger extends Component<IAlloyFingerProps> {
   }
 
   private _swipeDirection(x1: number, x2: number, y1: number, y2: number): directions | 'Nochange' {
-    if (Math.abs(x1 - x2) > 80 || this.end as number - (this.now as number) < 250) {
+    if (Math.abs(x1 - x2) > 80 || (this.end && this.now && this.end  - this.now < 250)) {
       return Math.abs(x1 - x2) >= Math.abs(y1 - y2) ? (x1 - x2 > 0 ? directions.L : directions.R) : (y1 - y2 > 0 ? directions.U : directions.D);
     } else {
       return 'Nochange';
